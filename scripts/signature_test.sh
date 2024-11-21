@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Test creation and verification of signature using oqsprovider for alg $1
-
 set -e
+cd $(dirname $0) && cd ..
 
 export DYLD_LIBRARY_PATH="/Usr/local/lib"
 
