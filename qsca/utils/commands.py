@@ -30,7 +30,9 @@ def sign_file(data_file: Path, key_file: Path, signed_file: Path):
 
 
 def verify_signature(data_file: Path, key_file: Path, signed_file: Path):
-    """Tarkistaa allekirjoituksen."""
+    """
+    Verify the input data (which must be a hash) against the signature file and indicate if the verification succeeded or failed
+    """
     command = [
         "openssl",
         "pkeyutl",
