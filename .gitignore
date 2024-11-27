@@ -1,5 +1,7 @@
 .venv
 .DS_Store
 .ruff_cache
+.vscode/
 __pycache__
-ca/
+resources/
+.env
