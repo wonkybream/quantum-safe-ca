@@ -42,5 +42,5 @@ Creates a certificate chain with two intermediate certificates _A_ and _B_. This
 Two folders need to be created under `ca/` folder, one for _server certificate chain_ and one for _iot certificate chain_. You can use [_full_ca.sh_](./scripts/full_ca.sh) script for that.
 
 ```shell
-fastapi dev est_server.py
+fastapi dev qsca/main.py
 ```
