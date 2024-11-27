@@ -1,4 +1,4 @@
-from qsca.utils.commands import generate_key, sign_file, verify_signature
+from qsca.commands import generate_key, sign_file, verify_signature
 
 
 def test_sign_and_verify_using_dilithium3(tmp_path):
