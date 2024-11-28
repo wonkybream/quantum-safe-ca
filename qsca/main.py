@@ -1,44 +1,55 @@
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Response
+from fastapi.responses import FileResponse, JSONResponse
 
-from qsca.configuration import RESOURCES_DIR
+from qsca.commands import pem_to_pkcs7
+from qsca.configuration import CERTIFICATE_CHAINS
+
 
 app = FastAPI()
 
-CA_DIR = RESOURCES_DIR
-SERVER_CA_PATH = CA_DIR / "server_chain"
-IOT_A_CA_PATH = CA_DIR / "iot_chain"
-IOT_B_CA_PATH = CA_DIR / "iot_chain"
 
+@app.get(
+    "/.well-known/est/{chain_label}/cacerts",
+    responses={
+        200: {
+            "content": {"application/pkcs7-mime": {}},
+            "description": "A certs-only CMC Simple PKI Response",
+        },
+        404: {
+            "content": {"application/json": {}},
+            "description": "Certificate chain not found.",
+        },
+    },
+    response_class=Response,
+    name="CA Certificates Request",
+)
+async def get_ca_certificates(chain_label: str):
+    """
+    Returns the PKCS#7 certificate chain for the given label.
+    """
+    if chain_label not in CERTIFICATE_CHAINS.keys():
+        return JSONResponse(
+            status_code=404, content={"message": "Certificate chain not found."}
+        )
 
-@app.get("/cacerts/server")
-async def get_server_cert_tree():
-    """
-    Returns server certificate chain
-    """
-    file_path = SERVER_CA_PATH / "chain_a.pem"
+    pem_file = CERTIFICATE_CHAINS[chain_label]
+    pkcs7_file = pem_file.with_suffix(".p7b")
+
+    if not pkcs7_file.exists() or pem_file.stat().st_mtime > pkcs7_file.stat().st_mtime:
+        pem_to_pkcs7(pem_file, pkcs7_file)
+
     return FileResponse(
-        file_path, media_type="application/x-pem-file", filename="server_chain.pem"
+        pkcs7_file,
+        media_type="application/pkcs7-mime",
+        filename=f"{chain_label}_chain.p7b",
     )
 
+    # with open(pkcs7_file, "rb") as f:
+    #     pkcs7_data = f.read()
+    #     base64_data = base64.b64encode(pkcs7_data).decode("ascii")
 
-@app.get("/cacerts/iota")
-async def get_iota_cert_tree():
-    """
-    Returns IoT A certificate chain
-    """
-    file_path = IOT_A_CA_PATH / "chain_a.pem"
-    return FileResponse(
-        file_path, media_type="application/x-pem-file", filename="iot_a_chain.pem"
-    )
-
-
-@app.get("/cacerts/iotb")
-async def get_iotb_cert_tree():
-    """
-    Return IoT B certificate chain
-    """
-    file_path = IOT_B_CA_PATH / "chain_b.pem"
-    return FileResponse(
-        file_path, media_type="application/x-pem-file", filename="iot_b_chain.pem"
-    )
+    # return Response(
+    #     content=base64_data,
+    #     media_type="application/pkcs7-mime",
+    #     headers={"Content-Transfer-Encoding": "base64"}
+    # )
