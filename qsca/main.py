@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Response
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import FastAPI, Response, status
+from fastapi.responses import FileResponse
 
 from qsca.commands import pem_to_pkcs7
 from qsca.configuration import CERTIFICATE_CHAINS
@@ -16,20 +16,27 @@ app = FastAPI()
             "description": "A certs-only CMC Simple PKI Response",
         },
         404: {
-            "content": {"application/json": {}},
-            "description": "Certificate chain not found.",
+            "content": {"text/plain": {}},
+            "description": "Certificate chain not found",
+        },
+        422: {
+            "content": {"text/plain": {}},
+            "description": "Unprocessable Content",
         },
     },
     response_class=Response,
     name="CA Certificates Request",
+    tags=["Distribution of CA"],
 )
 async def get_ca_certificates(chain_label: str):
     """
     Returns the PKCS#7 certificate chain for the given label.
     """
     if chain_label not in CERTIFICATE_CHAINS.keys():
-        return JSONResponse(
-            status_code=404, content={"message": "Certificate chain not found."}
+        return Response(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content="Certificate chain not found",
+            media_type="text/plain",
         )
 
     pem_file = CERTIFICATE_CHAINS[chain_label]
