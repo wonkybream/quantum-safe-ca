@@ -1,5 +1,7 @@
 # Quantum Safe CA
 
+[![Ruff](https://github.com/wonkybream/quantum-safe-ca/actions/workflows/ruff.yml/badge.svg)](https://github.com/wonkybream/quantum-safe-ca/actions/workflows/ruff.yml)
+
 Experimentations with _quantum safe_ algorithms and _X509_ certificates.
 
 **Dependencies:**
