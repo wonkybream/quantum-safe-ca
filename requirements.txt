@@ -1,4 +1,4 @@
 setuptools==75.8.0 
-ruff==0.8.2 
+ruff==0.9.1 
 pytest==8.3.4
 fastapi[standard]==0.115.6
